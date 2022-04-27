@@ -1,0 +1,216 @@
+<html>
+
+	<!-- This isn't a website designed to be pretty its to show function -->
+
+	<head>
+		<title>B I O</title>
+		
+		<style>
+			table, td, th {
+				border: 1px solid black;
+				width: 40%;
+			}
+			
+			.button {
+				background-color: #4CAF50;
+				color: white;
+				padding: 10px 15px;
+				text-align: center;
+				text-decoration: none;
+				font-size: 16px;
+				cursor: pointer;
+			}
+
+			div.heading {
+				text-align: center;
+			}
+			
+			div.description{
+				font-size: 16px;
+			}
+			
+			div.inputs {
+				font-size: 20px;
+			}
+			
+		</style>
+		
+		<script>
+			//Make an AJAX query
+			function makeAjaxQuery()
+			{
+				//Create an XMLHttpRequest
+				var xhttp = new XMLHttpRequest();
+
+				//Create a handler for the readyState change
+				xhttp.onreadystatechange = function() {
+					readyStateChangeHandler(xhttp);
+				};
+				
+				//Get the hash block from the user
+				var input = document.getElementById("hashInput");
+				
+				//Save the input as a value and NOT as an object
+				var hash = input.value;
+				
+				//Creates the url to get the bitcoins JSON info
+				var url = "https://explorer.api.bitcoin.com/bch/v1/block/" + hash;
+ 
+				//Making query by async call
+				var queryUrl = url;
+				xhttp.open("GET", queryUrl, true);
+				xhttp.send();
+			}
+
+			//Handler for the readyState change
+			function readyStateChangeHandler(xhttp)
+			{
+				if (xhttp.readyState == XMLHttpRequest.DONE)
+				{
+					if(xhttp.status == 200)
+					{
+						// status = 200 means OK
+						handleStatusSuccess(xhttp);
+					}
+					else
+					{
+						 // status is NOT OK
+						 handleStatusFailure(xhttp);
+					}
+				}
+			}
+
+			// XMLHttpRequest failed
+			function handleStatusFailure(xhttp)
+			{
+				var errorDisplay = document.getElementById("errorSpan");
+				errorDisplay.innerHTML = "<b style='color:red;font-size:50px;'>Invalid bitcoin block hash</b>";
+			}
+
+			// XMLHttpRequest success
+			function handleStatusSuccess(xhttp)
+			{
+				// Get the response json
+				var jsonText = xhttp.responseText;
+
+				// Parse the json into an object
+				var obj = JSON.parse(jsonText);
+
+				// display the object on the page
+				display(obj);
+			}
+			
+			// display the javascript object info on the webpage
+			function display(obj)
+			{
+				//Clears the error span incase the intial block has was wrong
+				var errorDisplay = document.getElementById("errorSpan");
+				errorDisplay.innerHTML = "";
+
+				//Gets the element to print the table in
+				var displayDiv = document.getElementById("printTable");
+				
+				//Adds html elements to a string to be inserted into a div
+				var html = "";
+				html += "<table>";
+				html += "<tr>";
+				html += "<td>";
+				html += "Hash Information";
+				html += "</td>";
+				html += "<td>";
+				html += obj.hash;
+				html += "</td>";
+				html += "</tr>";
+				
+				html += "<tr>";
+				html += "<td>";
+				html += "Size Information";
+				html += "</td>";
+				html += "<td>";
+				html += obj.size;
+				html += "</td>";
+				html += "</tr>";
+				
+				html += "<tr>";
+				html += "<td>";
+				html += "Height Information";
+				html += "</td>";
+				html += "<td>";
+				html += obj.height;
+				html += "</td>";
+				html += "</tr>";
+				
+				html += "<tr>";
+				html += "<td>";
+				html += "Version Information";
+				html += "</td>";
+				html += "<td>";
+				html += obj.version;
+				html += "</td>";
+				html += "</tr>";
+				
+				html += "<tr>";
+				html += "<td>";
+				html += "Merkleroot Information";
+				html += "</td>";
+				html += "<td>";
+				html += obj.merkleroot;
+				html += "</td>";
+				html += "</tr>";
+				
+				html += "<tr>";
+				html += "<td>";
+				html += "TX Information";
+				html += "</td>";
+				html += "<td>";
+				html += "<ul>";
+				
+				//For loop to print each row out
+				for(var i=0; i<obj.tx.length; i++)
+				{
+					var feeDetail = obj.item[i];
+					html += "<li>";
+					html += obj.tx;
+					html += "</li>";
+				}
+				
+				html += "</ul>";
+				html += "</td>";
+				html += "</tr>";
+				html += "</table>";
+				
+				//Inserts the string into the div which displays the table
+				displayDiv.innerHTML = html;
+			}
+		</script>
+	</head>
+	
+	<body>
+		<div class="heading">
+			<h1>Bitcoin Information Obtainer</h1>
+			
+		</div>
+		
+		<hr>
+		
+		<div class="description">
+			<p>Insert a a bitcoin hash into the text box below and hit the 'Get Bitcoin Block Information' to proceed to see the information on it</p>
+		</div>
+		
+		<hr>
+		
+		<div class="inputs">
+			<p>Enter a bitcoin block hash:<input type="text" id="hashInput" size="70" /></p>
+		</div>
+		
+		<button class="button" onClick="makeAjaxQuery();">
+			Get Bitcoin Block Information
+		</button>
+		<br />
+		
+		<span id="errorSpan"></span>
+		<br />
+		<div id="printTable">	
+		</div>
+	</body>
+</html>
